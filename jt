@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+import os
+import time
+DBASE_PATH = os.environ.get("JT_DBASE",os.path.expanduser("~/jobtimer.log"))
+
+def parse_day(day_num,lines):
+    jobs=dict()
+    day =None
+    for i,l in enumerate(lines):
+        start_time,job=l.split()
+        start_time=int(start_time)
+        if job=="STOP":
+            continue
+        if time.gmtime(start_time).tm_yday != day_num:
+            continue
+        end_time = int(lines[i+1].split()[0])
+        day=time.gmtime(start_time)
+        existing_time = jobs.get(job,0)
+        jobs[job]=existing_time+end_time-start_time
+    return jobs,day
+            
+        
+def dump_data():
+    if os.path.exists(DBASE_PATH):
+        lines = open(DBASE_PATH).readlines()
+    else:
+        lines =[]
+    if len(lines) == 0:
+        sys.stderr.write("Error:Database empty\n")
+        sys.exit(1)
+    if lines[-1].split()[1] != "STOP":
+        sys.stderr.write("Error:last entry in database is not STOP\n")
+        sys.exit(1)
+    start_day=time.gmtime(int(lines[0][0])).tm_yday
+    end_day=time.gmtime().tm_yday+1
+    for day in range(start_day,end_day):
+        jobs,date = parse_day(day,lines)
+        if(len(jobs) >0):
+            print(time.strftime("%a %b %d",date))
+            for k in jobs.keys():                
+                print(f"   {k}:{jobs[k]/3600:.2f}")
+                  
+                          
+    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('job_name')
+    args = parser.parse_args()
+    now = int(time.time())
+    job_name = args.job_name.upper()
+    if job_name == "DUMP":
+        dump_data()
+        sys.exit(0)
+    if job_name == "CLEAR":
+        open(DBASE_PATH,"w").close()
+        sys.exit(0)
+    if os.path.exists(DBASE_PATH):
+        lines = open(DBASE_PATH).readlines()
+    else:
+        lines =[]
+    if len(lines) != 0:
+        last_job = lines[-1].split()[1]
+        last_job_start_time = int(lines[-1].split()[0])
+        if last_job == job_name:
+            sys.stderr.write("ERROR:Repeated job name\n")
+            sys.exit(1)
+    else:
+        last_job = None
+    if last_job == "STOP":
+        last_job = None
+    else:
+        print(f"Starting job {job_name} at {time.asctime()}")
+    with open(DBASE_PATH,"a") as db:
+        db.write(f"{now} {job_name}\n")
+                     
+    if last_job:
+        last_job_duration= now-last_job_start_time
+        hours = int(last_job_duration/3600)
+        last_job_duration -= hours*3600
+        mins = last_job_duration/60
+        print(f"Last job ({last_job}) ran for {hours}:{mins}\n"+
+              f"It started at {time.ctime(last_job_start_time)}")
