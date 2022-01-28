@@ -71,7 +71,7 @@ if __name__ == "__main__":
         last_job = None
     if last_job == "STOP":
         last_job = None
-    else:
+    if job_name != "STOP":        
         print(f"Starting job {job_name} at {time.asctime()}")
     with open(DBASE_PATH,"a") as db:
         db.write(f"{now} {job_name}\n")
