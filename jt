@@ -48,9 +48,12 @@ def dump_data():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('job_name')
+    parser.add_argument('--offset','-o',default=0,type=int,
+                        help="Offset the start time by this many seconds. (Positive or Negative)")
     args = parser.parse_args()
-    now = int(time.time())
+    offset_secs = args.offset*60
     job_name = args.job_name.upper()
+    now = int(time.time())+ offset_secs
     if job_name == "DUMP":
         dump_data()
         sys.exit(0)
@@ -72,7 +75,7 @@ if __name__ == "__main__":
     if last_job == "STOP":
         last_job = None
     if job_name != "STOP":        
-        print(f"Starting job {job_name} at {time.asctime()}")
+        print(f"Starting job {job_name} at {time.asctime(time.localtime(now))}")
     with open(DBASE_PATH,"a") as db:
         db.write(f"{now} {job_name}\n")
                      
