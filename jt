@@ -14,10 +14,10 @@ def parse_day(day_num,lines):
         start_time=int(start_time)
         if job=="STOP":
             continue
-        if time.gmtime(start_time).tm_yday != day_num:
+        if time.localtime(start_time).tm_yday != day_num:
             continue
         end_time = int(lines[i+1].split()[0])
-        day=time.gmtime(start_time)
+        day=time.localtime(start_time)
         existing_time = jobs.get(job,0)
         jobs[job]=existing_time+end_time-start_time
     return jobs,day
@@ -34,9 +34,11 @@ def dump_data():
     if lines[-1].split()[1] != "STOP":
         sys.stderr.write("Error:last entry in database is not STOP\n")
         sys.exit(1)
-    start_day=time.gmtime(int(lines[0][0])).tm_yday
-    end_day=time.gmtime().tm_yday+1
+    
+    start_day=time.localtime(int(lines[0].split()[0])).tm_yday
+    end_day=time.localtime().tm_yday+1
     for day in range(start_day,end_day):
+        
         jobs,date = parse_day(day,lines)
         if(len(jobs) >0):
             print(time.strftime("%a %b %d",date))
