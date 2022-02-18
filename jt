@@ -21,8 +21,8 @@ def parse_day(day_num,lines):
         existing_time = jobs.get(job,0)
         jobs[job]=existing_time+end_time-start_time
     return jobs,day
-            
-        
+
+
 def dump_data():
     if os.path.exists(DBASE_PATH):
         lines = open(DBASE_PATH).readlines()
@@ -34,28 +34,28 @@ def dump_data():
     if lines[-1].split()[1] != "STOP":
         sys.stderr.write("Error:last entry in database is not STOP\n")
         sys.exit(1)
-    
+
     start_day=time.localtime(int(lines[0].split()[0])).tm_yday
     end_day=time.localtime().tm_yday+1
     for day in range(start_day,end_day):
-        
+
         jobs,date = parse_day(day,lines)
         if(len(jobs) >0):
             print(time.strftime("%a %b %d",date))
-            for k in jobs.keys():                
+            for k in jobs.keys():
                 print(f"   {k}:{jobs[k]/3600:.2f}")
-                  
-                          
-    
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('job_name')
     parser.add_argument('--offset','-o',default=0,type=int,
-                        help="Offset the start time by this many seconds. (Positive or Negative)")
+                        help="Offset the start time by this many seconds ago")
     args = parser.parse_args()
     offset_secs = args.offset*60
     job_name = args.job_name.upper()
-    now = int(time.time())+ offset_secs
+    now = int(time.time())- offset_secs
     if job_name == "DUMP":
         dump_data()
         sys.exit(0)
@@ -76,15 +76,16 @@ if __name__ == "__main__":
         last_job = None
     if last_job == "STOP":
         last_job = None
-    if job_name != "STOP":        
+    if job_name != "STOP":
         print(f"Starting job {job_name} at {time.asctime(time.localtime(now))}")
     with open(DBASE_PATH,"a") as db:
         db.write(f"{now} {job_name}\n")
-                     
+
     if last_job:
         last_job_duration= now-last_job_start_time
         hours = int(last_job_duration/3600)
         last_job_duration -= hours*3600
-        mins = last_job_duration/60
-        print(f"Last job ({last_job}) ran for {hours}:{mins}\n"+
-              f"It started at {time.ctime(last_job_start_time)}")
+        mins = int(last_job_duration/60)
+        print(f"Last job ({last_job}) ran for {hours}:{mins}\n")
+        if job_name == "STOP":
+            dump_data()
