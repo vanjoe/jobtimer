@@ -43,7 +43,9 @@ def dump_data():
         if(len(jobs) >0):
             print(time.strftime("%a %b %d",date))
             for k in jobs.keys():
-                print(f"   {k}:{jobs[k]/3600:.2f}")
+                hr=int(jobs[k]/3600)
+                mn=int((jobs[k] - hr*3600)/60)
+                print(f"   {k} {hr}:{mn:02}")
 
 
 
