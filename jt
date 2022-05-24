@@ -31,10 +31,12 @@ def dump_data():
     if len(lines) == 0:
         sys.stderr.write("Error:Database empty\n")
         sys.exit(1)
-    if lines[-1].split()[1] != "STOP":
-        sys.stderr.write("Error:last entry in database is not STOP\n")
-        sys.exit(1)
-
+    current_job=None
+    last_job=lines[-1].split()[1]
+    if last_job != "STOP":
+        current_job=last_job
+        lines.append(f"{int(time.time())} STOP")
+        
     start_day=time.localtime(int(lines[0].split()[0])).tm_yday
     end_day=time.localtime().tm_yday+1
     for day in range(start_day,end_day):
@@ -46,7 +48,8 @@ def dump_data():
                 hr=int(jobs[k]/3600)
                 mn=int((jobs[k] - hr*3600)/60)
                 print(f"   {k} {hr}:{mn:02}")
-
+    if current_job is not None:
+        print(f"Currently tracking {current_job}")
 
 
 if __name__ == "__main__":
@@ -88,6 +91,6 @@ if __name__ == "__main__":
         hours = int(last_job_duration/3600)
         last_job_duration -= hours*3600
         mins = int(last_job_duration/60)
-        print(f"Last job ({last_job}) ran for {hours}:{mins}\n")
+        print(f"Last job ({last_job}) ran for {hours}:{mins:02}\n")
         if job_name == "STOP":
             dump_data()
