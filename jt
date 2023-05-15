@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 import time
+import subprocess
 DBASE_PATH = os.environ.get("JT_DBASE",os.path.expanduser("~/jobtimer.log"))
 
 def parse(field_num,lines,field_name):
@@ -38,24 +39,12 @@ def dump_data():
         lines.append(f"{int(time.time())} STOP")
 
 
-    
-    start_day=time.localtime(int(lines[0].split()[0])).tm_yday
-    end_day=time.localtime().tm_yday+1
-    for day in range(start_day,end_day):
-
-        jobs,date = parse(day,lines,"tm_yday")
-        if(len(jobs) >0):
-            print(time.strftime("%a %b %d",date))
-            for k in jobs.keys():
-                hr=int(jobs[k]/3600)
-                mn=int((jobs[k] - hr*3600)/60)
-                print(f"   {k} {hr}:{mn:02}")
-
-        
     jobs,date = parse(time.localtime().tm_year,lines,"tm_year")
+    max_jobname=max([len(n) for n in jobs])
+    
     if(len(jobs) >0):
-        print("\nSubtotals:")
-        for k in jobs.keys():
+        print("Subtotals:")
+        for k in sorted(jobs.keys()):
             hr=int(jobs[k]/3600)
             mn=int((jobs[k] - hr*3600)/60)
             print(f"   {k} {hr}:{mn:02}")
@@ -64,9 +53,23 @@ def dump_data():
     mn=int((total_time - hr*3600)/60)
 
     print(f"Total: {hr}:{mn:02}")
+    print('==='+'='*max_jobname+'======\n')
+    
+    start_day=time.localtime(int(lines[0].split()[0])).tm_yday
+    end_day=time.localtime().tm_yday+1
+    for day in range(start_day,end_day):
+
+        jobs,date = parse(day,lines,"tm_yday")
+        if(len(jobs) >0):
+            print(time.strftime("%a %b %d",date))
+            for k in sorted(jobs.keys()):
+                hr=int(jobs[k]/3600)
+                mn=int((jobs[k] - hr*3600)/60)
+                print(f"   {k} {hr}:{mn:02}")
     if current_job is not None:
         print(f"Currently tracking {current_job}")
 
+        
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
