@@ -16,3 +16,13 @@ To install simply copy the `jt` file to somewhere in your path.
 By default the database is created in `~/jobtimer.log` but if that 
 doesn't work for you, the environment variable JT_DBASE overrides this.
 
+
+# KDE Widget
+
+To install the widget run:
+
+```
+rm -rf ~/.local/share/plasma/plasmoids/org.kde.plasma.jobtimer-widget/ && kpackagetool6 --install . --type Plasma/Applet
+```
+
+

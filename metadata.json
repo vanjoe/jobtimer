@@ -1,0 +1,26 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "user@example.com",
+                "Name": "Widget Developer"
+            }
+        ],
+        "Category": "Utilities",
+        "Description": "A simple test widget that displays the current task",
+        "EnabledByDefault": true,
+        "Icon": "applications-utilities",
+        "Id": "org.kde.plasma.jobtimer-widget",
+        "License": "GPL-2.0+",
+        "Name": "JobTimer Widget",
+        "ServiceTypes": [
+            "Plasma/Applet"
+        ],
+        "Version": "1.0",
+        "Website": ""
+    },
+    "KPackage": {
+        "Type": "Plasma/Applet"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0.0"
+}
