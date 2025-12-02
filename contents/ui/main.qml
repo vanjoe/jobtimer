@@ -47,9 +47,15 @@ PlasmoidItem {
         }
     }
     
+    property string lastCommand: ""
+
     function updateText() {
+        if (lastCommand !== "") {
+            fileReader.disconnectSource(lastCommand)
+        }
         var command = "test -f $HOME/jobtimer.log && tail -n 1 $HOME/jobtimer.log || echo 'NOFILE' # " + Date.now()
         fileReader.connectSource(command)
+        lastCommand = command
     }
     
     preferredRepresentation: fullRepresentation
@@ -57,6 +63,13 @@ PlasmoidItem {
     Component.onCompleted: {
         updateText()
         updateTimer.start()
+    }
+
+    Component.onDestruction: {
+        updateTimer.stop()
+        if (lastCommand !== "") {
+            fileReader.disconnectSource(lastCommand)
+        }
     }
     
     Timer {
